@@ -106,6 +106,7 @@
       font-weight: bold;
     }
 
+    /* Start and End screens */
     #start-screen,
     #end-screen {
       position: absolute;
@@ -113,6 +114,7 @@
       left: 0;
       width: 100%;
       height: 100%;
+      /* Default background – overridden for end screen below */
       background-color: rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
@@ -206,7 +208,7 @@
       z-index: 5;
     }
 
-    /* CSS for game controls (pause, restart, quit) */
+    /* Game controls (pause, restart, quit) */
     #game-controls {
       position: absolute;
       bottom: 10px;
@@ -244,36 +246,76 @@
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-      100% {
-        transform: scale(1);
-      }
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     @keyframes blink {
-      0% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-      100% {
-        opacity: 1;
-      }
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* --- New Landscape Background for End Screen --- */
+    #end-screen {
+      background-color: #000022; /* Dark blue night sky */
+      background-image: linear-gradient(
+        to bottom,
+        #000033 0%,
+        #000055 40%,
+        #003366 60%,
+        #006633 80%,
+        #00aa44 100%
+      );
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Stars */
+    #end-screen::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60%;
+      background-image: radial-gradient(white 1px, transparent 0);
+      background-size: 50px 50px;
+      z-index: 1;
+    }
+
+    /* Moon */
+    #end-screen::after {
+      content: "";
+      position: absolute;
+      top: 50px;
+      right: 50px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: #ffffee;
+      box-shadow: 0 0 20px 5px rgba(255, 255, 238, 0.5);
+      z-index: 2;
+    }
+
+    /* Ensure text and button appear above the background */
+    #end-screen h1,
+    #end-screen p,
+    #end-screen button {
+      position: relative;
+      z-index: 5;
+    }
+
+    #end-screen h1 {
+      font-size: 48px;
+      margin-bottom: 100px;
+      text-shadow: 2px 2px 4px #000;
     }
   </style>
 </head>
@@ -287,7 +329,7 @@
     <div id="timer">60</div>
     <div id="video-container"></div>
     <div id="speed-indicator">Speed: 1.0x</div>
-    <!-- Game controls inserted between speed indicator and score -->
+    <!-- Game controls -->
     <div id="game-controls" style="display: none;">
       <button class="control-button" id="stop-button">Pause</button>
       <button class="control-button" id="restart-button">Restart</button>
@@ -307,8 +349,9 @@
       </div>
     </div>
 
+    <!-- Updated End Screen with new text and layout -->
     <div id="end-screen">
-      <h1>Game Over!</h1>
+      <h1>TOUCH THE GRASS</h1>
       <p>Your final score: <span id="final-score">0</span></p>
       <button class="restart-button">Play Again</button>
     </div>
@@ -873,7 +916,7 @@
         resetGame();
       }
 
-      // Modified end game function
+      // Modified end game function – this handles stopping intervals and showing the end screen
       function endCurrentGame(showEndScreen = true) {
         isGameRunning = false;
         isPaused = false;
@@ -919,8 +962,19 @@
         }
       }
 
-      // Replace original endGame with modified version
+      // Updated endGame function that plays ambient music before ending the game
       function endGame() {
+        if (!synth) {
+          initAudio();
+        }
+        const ambientSynth = new Tone.PolySynth().toDestination();
+        ambientSynth.volume.value = -15;
+        Tone.start();
+        ambientSynth.triggerAttackRelease(["E3", "B3", "E4"], "4n");
+        setTimeout(() => {
+          ambientSynth.triggerAttackRelease(["G3", "D4", "G4"], "4n");
+        }, 1000);
+
         endCurrentGame(true);
       }
 
